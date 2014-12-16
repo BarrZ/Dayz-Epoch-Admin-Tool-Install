@@ -1,0 +1,73 @@
+
+Open the init.sqf in the root of your mission folder.
+
+Paste the following
+
+call compile preprocessFileLineNumbers "admintools\AdminList.sqf"; // Epoch admin Tools variables/UIDs
+Directly under this:
+
+call compile preprocessFileLineNumbers "server_traders.sqf";
+So that it looks like this:
+
+call compile preprocessFileLineNumbers "\z\addons\dayz_code\init\variables.sqf";
+progressLoadingScreen 0.1;
+call compile preprocessFileLineNumbers "\z\addons\dayz_code\init\publicEH.sqf";
+progressLoadingScreen 0.2;
+call compile preprocessFileLineNumbers "\z\addons\dayz_code\medical\setup_functions_med.sqf";
+progressLoadingScreen 0.4;
+call compile preprocessFileLineNumbers "\z\addons\dayz_code\init\compiles.sqf";
+progressLoadingScreen 0.5;
+call compile preprocessFileLineNumbers "server_traders.sqf";
+call compile preprocessFileLineNumbers "admintools\AdminList.sqf"; // Epoch admin Tools variables/UIDs
+progressLoadingScreen 1.0;
+Paste the following at the very bottom of the init:
+
+[] execVM "admintools\Activate.sqf"; // Epoch admin tools
+If you use the normal battleye antiahck or similar do this step, if not then skip it.
+
+Find the antihack line in your init.sqf, it may or may not be the same as this
+
+[] execVM "\z\addons\dayz_code\system\antihack.sqf";
+if you have the line above replace it with this:
+
+// Epoch Admin Tools
+if ( !((getPlayerUID player) in AdminList) && !((getPlayerUID player) in ModList)) then 
+{
+  [] execVM "admintools\antihack\antihack.sqf"; // Epoch Antihack with bypass
+};
+If you do not have the mentioned line then simply replace the antihack.sqf line in the above code with the one you have.
+Save the init.sqf
+
+Open your description.ext
+Paste the following at the very bottom:
+
+// Epoch Admin Tools
+#include "admintools\dialog.hpp"
+Open admintools\AdminList.sqf
+
+Replace the "111111111" with your Player ID in order to have full access to the menu.
+The mission pbo is done. Repack it and upload it to your server (FTP or host's File Manager).
+Extract the .txt files from the Epoch-Admin-Tools/Battleye folder to your server's Battleye folder, overwriting the existing .txt files.
+
+Note: The location of your server's Battleye folder depends on the server and hosting. For some users, this may be in CONFIGFILES/Battleye.
+Locate your @DayZ_Epoch_Server/addons/dayz_server.pbo on your server host, download and unpack it, and open the resulting dayz_server folder.
+
+Open init/server_functions.sqf and replace this:
+
+    if(vehicle _x != _x && !(vehicle _x in PVDZE_serverObjectMonitor) && (isPlayer _x)  && !((typeOf vehicle _x) in DZE_safeVehicle)) then {
+...with this:
+
+    // Epoch Admin Tools
+    if(vehicle _x != _x && !(vehicle _x in PVDZE_serverObjectMonitor) && (isPlayer _x)  && !((typeOf vehicle _x) in DZE_safeVehicle) && (vehicle _x getVariable ["MalSar",0] !=1)) then {
+
+Note: This step may not work well if you use other mods that modify this operator. The important code to fit into this operator is && (vehicle _x getVariable ["MalSar",0] !=1) which can be added easily with a rudimentary knowledge of programming.
+
+Now open your compile/server_updateObject.sqf and place this:
+
+// Epoch Admin Tools
+if (_object getVariable "MalSar" == 1) exitWith {};
+...immediately above this:
+
+if (!_parachuteWest and !(locked _object)) then {
+
+Repack the server pbo and upload it to your server.
